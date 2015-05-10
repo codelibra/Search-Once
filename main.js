@@ -1,3 +1,21 @@
+
+var browserAction = chrome.browserAction;
+/**
+ * Used to clear the unread count on the extension icon
+ */
+function setAllRead() {
+    browserAction.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
+    browserAction.setBadgeText({text: ' '});   // <-- set text to '' to remove the badge
+}
+/**
+ * Used to set the unread count on extension icon
+ * @param {[type]} cnt [description]
+ */
+function setUnread(cnt) {
+    browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 128]});
+    browserAction.setBadgeText({text: '' + cnt});
+}
+
 /**
  * change the text of the elemet found
  **/
@@ -15,7 +33,7 @@ function getCompleteHistory(callback){
    * @type {Object}
    */
   var queryInfo = {
-    text:'stack'
+    text:'google'
   };
 
   chrome.history.search(queryInfo, function(historyItems){
@@ -29,8 +47,8 @@ function getCompleteHistory(callback){
  */
 document.addEventListener('DOMContentLoaded',function() {
 
-var list = document.getElementById('all-history');
-
+var list        = document.getElementById('all-history');
+var unreadCount = 0;
 getCompleteHistory(function(historyItems){
 
   historyItems.forEach(function(item){
@@ -44,10 +62,11 @@ getCompleteHistory(function(historyItems){
       entryAnchor.innerHTML = item.title;
       entry.appendChild(entryAnchor);
       list.appendChild(entry);
+      unreadCount ++;
   }
 
   });
-
+  setUnread(unreadCount);
 });
 
 });
