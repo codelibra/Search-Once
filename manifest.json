@@ -1,14 +1,14 @@
 {
   "manifest_version": 2,
 
-  "name": "Getting started example",
-  "description": "This extension shows a Google Image search result for the current page",
+  "name": "Search Once",
+  "description": "This extension remembers your searches and gives relavent links when you search for the query again later.",
   "version": "1.0",
 
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html",
-    "default_title": "Click here!"
+    "default_title": "Search Results!"
   },
   "permissions": [
     "activeTab",
