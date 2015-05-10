@@ -34,7 +34,7 @@ function setAllRead() {
  */
 function setUnread(cnt) {
     var browserAction = chrome.browserAction;
-    browserAction.setBadgeBackgroundColor({color: [255, 0, 0, 128]});
+    browserAction.setBadgeBackgroundColor({color: [0, 0, 0, 128]});
     browserAction.setBadgeText({text: '' + cnt});
 }
 
@@ -55,11 +55,11 @@ function generateSearchText(url) {
       var delimiter = url.indexOf('&');
 
       if (start != end) {
-        searchText = url.slice(start + 2, delimiter) + url.slice(end + 2);
+        searchText = url.slice(start + 2, delimiter) + '+' + url.slice(end + 2);
       } else {
         searchText = url.slice(start + 2, delimiter);
       }
-      console.log(searchText);
+      console.log('Searching history for:' + searchText);
     }
     return searchText;
   }
