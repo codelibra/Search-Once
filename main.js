@@ -3,7 +3,7 @@
  *
  * @param {function(string)} callback - called when current search is found.
  **/
-function getCurrentTabUrl(callback) {
+function getCurrentTabTitle(callback) {
   var queryInfo = {
     active: true,
     currentWindow: true
@@ -14,8 +14,8 @@ function getCurrentTabUrl(callback) {
      // the return variable should only have one entry
      var activeTab   = tabs[0];
      //using the url of the current serach find the correct search terms
-     var activeURL   = activeTab.url;
-     callback(activeURL);
+     var activeTitle   = activeTab.title;
+     callback(activeTitle);
   });
 }
 
@@ -47,22 +47,10 @@ function setUnread(cnt) {
  *     either from the first q= to & or from the last q= to the end of the url
  *  @return search terms
  */
-function generateSearchText(url) {
-
-    if (url.indexOf("www.google") != -1) {
-      var start     = url.indexOf('q=');
-      var end       = url.lastIndexOf('q=');
-      var delimiter = url.indexOf('&');
-
-      if (start != end) {
-        searchText = url.slice(start + 2, delimiter) + '+' + url.slice(end + 2);
-      } else {
-        searchText = url.slice(start + 2, delimiter);
-      }
-      console.log('Searching history for:' + searchText);
-    }
-    return searchText;
-  }
+function generateSearchTags(title) {
+  var searchTags = title.split(" ");
+  return searchTags;
+}
 
 /**
  * change the text of the elemet found
@@ -80,18 +68,24 @@ function getCompleteHistory(callback){
    * https://developer.chrome.com/extensions/history
    * @type {Object}
    */
-   var searchText = '';
+   var searchTags;
    //using the current tab url generate the search term and then search the history
-   getCurrentTabUrl(function(url){
-      searchText = generateSearchText(url);
+   getCurrentTabTitle(function(title){
+      searchTags = generateSearchTags(title);
       var queryInfo = {
-        text: searchText
+        text: ''
       };
 
-      chrome.history.search(queryInfo, function(historyItems){
-        callback(historyItems);
-      });
+      for (var i in searchTags) {
+        if (searchTags[i] != '-' && searchTags[i] != ':' && searchTags[i] != 'Google' && searchTags[i] != 'Search') {
+          queryInfo.text = searchTags[i];
+          console.log(searchTags[i]);
 
+          chrome.history.search(queryInfo, function(historyItems){
+            callback(historyItems);
+          });
+        }
+      }
    });
 }
 
@@ -112,6 +106,7 @@ getCompleteHistory(function(historyItems){
 
       var entry             = document.createElement('li');
       var entryAnchor       = document.createElement('a');
+      entry.title           = "Last visited " + new Date(item.lastVisitTime) + " " + " Visited count " + item.visitCount;
       entryAnchor.target    = '_blank';
       entryAnchor.href      = item.url;
       entryAnchor.innerHTML = item.title;
