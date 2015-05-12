@@ -28,6 +28,7 @@ function setAllRead() {
     browserAction.setBadgeBackgroundColor({color: [0, 255, 0, 128]});
     browserAction.setBadgeText({text: ' '});   // <-- set text to '' to remove the badge
 }
+
 /**
  * Used to set the unread count on extension icon
  * @param {[type]} cnt [description]
@@ -48,7 +49,8 @@ function setUnread(cnt) {
  *  @return search terms
  */
 function generateSearchTags(title) {
-  var searchTags = title.split(" ");
+  var searchText = new FilterStopWords(title);
+  var searchTags = searchText.generateTags();
   return searchTags;
 }
 

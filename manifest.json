@@ -15,6 +15,7 @@
     "history",
     "storage",
     "tabs",
+    "storage",
     "https://ajax.googleapis.com/"
   ]
 }
