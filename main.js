@@ -13,7 +13,7 @@ function getCurrentTabTitle(callback) {
     // since only one tab should be active and in the current window at once
     // the return variable should only have one entry
     var activeTab = tabs[0];
-    //using the url of the current serach find the correct search terms
+    //using the title of the current search find the correct search terms
     var activeTitle = activeTab.title;
     callback(activeTitle);
   });
