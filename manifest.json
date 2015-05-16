@@ -10,12 +10,17 @@
     "default_popup": "popup.html",
     "default_title": "Search Results!"
   },
+  "background": {
+    "scripts": ["localStorage.js"],
+    "persistent": false
+  },
   "permissions": [
+    "webNavigation",
     "activeTab",
     "history",
     "storage",
     "tabs",
-    "storage",
     "https://ajax.googleapis.com/"
-  ]
+  ],
+  "web_accessible_resources": ["tagger.js"]
 }

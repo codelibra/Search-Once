@@ -1,3 +1,6 @@
+"use strict";
+var chrome = chrome || {};
+
 /**
  * Get the tab.
  *
