@@ -1,4 +1,4 @@
-/**
+ta/**
  * This script will be running  in the background and will collect the complete information
  * about what all pages the user visits and using what search terms.
  * Then it will generate some data structure which will be used to search in future the related pages
@@ -46,15 +46,15 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     console.log(tab);
 
     getTitleOfPageFromDOM(tab.id, function(title) {
-      if (tab.title.indexOf('Google Search') != -1) {
+      if (title.indexOf('Google Search') != -1) {
         // TODO: Find a way for figuring out the search tags from the google search url
         // the search is not always the titile of the page
-        var searchText = new FilterStopWords(tab.title);
+        var searchText = new FilterStopWords(title);
         var generatedTags = searchText.generateTags();
 
         if (!generatedTags || generatedTags.length === 0) {
           //when all the search terms were cleared as stopwords
-          generatedTags = tab.title;
+          generatedTags = title;
         }
         saveChangesToDestroyable({
           tabId: tab.id,
@@ -248,7 +248,7 @@ function saveChangesToPersistable(newObject) {
   });
 }
 
-// Gets the title of a page by firing a event: GetCurrentPageTitleFromDOM, that has binding in content script 
+// Gets the title of a page by firing a event: GetCurrentPageTitleFromDOM, that has binding in content script
 function getTitleOfPageFromDOM(tabId, callback) {
   chrome.tabs.sendMessage(tabId, {
       command: "GetCurrentPageTitleFromDOM",
