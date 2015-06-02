@@ -33,6 +33,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
   // Not considering the event calls when the page is still loading.
   if (changeInfo && changeInfo.status == 'complete' && tab && tab.url != 'chrome://newtab/') {
+    console.log("Page is changed");
     // figure out the type of navigation and perform the steps accordingly
 
     /*
@@ -46,9 +47,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     console.log(tab);
 
     getTitleOfPageFromDOM(tab.id, function (title) {
+      console.log("Title of page:", title);
       if (title && title.indexOf('Google Search') != -1) {
-        // TODO: Find a way for figuring out the search tags from the google search url
-        // the search is not always the titile of the page
         var searchText = new FilterStopWords(title);
         var generatedTags = searchText.generateTags();
 
@@ -255,7 +255,7 @@ function getTitleOfPageFromDOM(tabId, callback) {
       command: "GetCurrentPageTitleFromDOM",
     },
     function (title) {
-      console.log("Title of page:", title);
+      console.log("Response from content script:", title);
       callback(title);
     });
   }, 2000);
