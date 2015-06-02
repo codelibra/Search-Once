@@ -13,6 +13,7 @@ var stopWords = ["tis", "twas", "a", "aah", "aaron", "abandon", "abandoned", "ab
 
 var FilterStopWords = function(searchText) {
 	this.searchText = searchText;
+    this.originalText = searchText;
 };
 
 FilterStopWords.prototype.removeDelimiters = function() {
@@ -33,6 +34,7 @@ FilterStopWords.prototype.removeStopWords = function() {
 			tags.push(element);
 		}
 	});
+    if(tags.length == 0)   tags.push(this.originalText);
 	return tags;
 };
 

@@ -14,7 +14,7 @@
  */
 var s = document.createElement('script');
 s.src = chrome.extension.getURL('tagger.js');
-s.onload = function() {
+s.onload = function () {
   this.parentNode.removeChild(this);
 };
 (document.head || document.documentElement).appendChild(s);
@@ -29,7 +29,7 @@ var app = app || {};
  * @param  {[type]} changeInfo loading/completed
  * @param  {[type]} tab)       the complete tab object
  */
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
   // Not considering the event calls when the page is still loading.
   if (changeInfo && changeInfo.status == 'complete' && tab && tab.url != 'chrome://newtab/') {
@@ -45,7 +45,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
      */
     console.log(tab);
 
-    getTitleOfPageFromDOM(tab.id, function(title) {
+    getTitleOfPageFromDOM(tab.id, function (title) {
       if (title.indexOf('Google Search') != -1) {
         // TODO: Find a way for figuring out the search tags from the google search url
         // the search is not always the titile of the page
@@ -66,11 +66,11 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
          * figure out the tags of the opener id and then save the same for the current tab.
          * if the openeer tabId does not exist in the destoyable then return,
          */
-        chrome.storage.local.get('Destroyable', function(items) {
+        chrome.storage.local.get('Destroyable', function (items) {
           var parentTags = handleGetDestroyable(items.Destroyable, tab.openerTabId);
           if (parentTags == -1) return;
           // changes to persistable must be made only when destroyable save has returned
-          var completeDestroyableChanges = new Promise(function() {
+          var completeDestroyableChanges = new Promise(function () {
             saveChangesToDestroyable({
               tabId: tab.id,
               tags: parentTags
@@ -87,7 +87,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
          * Add this url to and the search tags to the base datastructure.
          * No changes to the destroyable are required.
          */
-        chrome.storage.local.get('Destroyable', function(items) {
+        chrome.storage.local.get('Destroyable', function (items) {
           var parentTags = handleGetDestroyable(items.Destroyable, tab.id);
           if (parentTags == -1) return;
           saveChangesToPersistable({
@@ -114,7 +114,7 @@ chrome.tabs.onRemoved.addListener(function callback(tabId, removeInfo) {
 
 function removeTabFromDestroyable(tabId) {
 
-  chrome.storage.local.get('Destroyable', function(allItems) {
+  chrome.storage.local.get('Destroyable', function (allItems) {
 
     allItems = allItems.Destroyable;
     for (var index = 0; index < allItems.length; ++index) {
@@ -125,7 +125,7 @@ function removeTabFromDestroyable(tabId) {
     }
     chrome.storage.local.set({
       'Destroyable': allItems
-    }, function() {
+    }, function () {
       console.log('Destroyable saved on tab close');
     });
 
@@ -155,7 +155,7 @@ function handleSaveDestroyable(allItems, newObject) {
   // Save it using the Chrome extension storage API.
   chrome.storage.local.set({
     'Destroyable': allItems
-  }, function() {
+  }, function () {
     console.log('Destroyable saved');
   });
 }
@@ -174,7 +174,7 @@ function saveChangesToDestroyable(newObject) {
     return;
   }
 
-  chrome.storage.local.get('Destroyable', function(items) {
+  chrome.storage.local.get('Destroyable', function (items) {
     handleSaveDestroyable(items, newObject);
   });
 }
@@ -190,11 +190,11 @@ function handleGetDestroyable(allItems, tabId) {
 }
 
 function handleSavePersistable(allItems, newObject) {
-
+  console.log(newObject.url + '     ' + newObject.tags);
   /**
    * A particular tag is present in a list of tags or not
    */
-  var isTagPresnet = function(items, newTag) {
+  var isTagPresnet = function (items, newTag) {
 
     if (items.indexOf(newTag) != -1) {
       return true;
@@ -213,7 +213,7 @@ function handleSavePersistable(allItems, newObject) {
     // if the url is already present then update else add
     for (var index = 0; index < allItems.length; ++index) {
       if (allItems[index].url == newObject.url) {
-        newObject.tags.forEach(function(newTag) {
+        newObject.tags.forEach(function (newTag) {
           if (!isTagPresnet(allItems[index].tags, newTag))
             allItems[index].tags.push(newTag);
         });
@@ -228,7 +228,7 @@ function handleSavePersistable(allItems, newObject) {
   // Save it using the Chrome extension storage API.
   chrome.storage.local.set({
     'Persistable': allItems
-  }, function() {
+  }, function () {
     console.log('Persistable saved');
   });
 
@@ -243,7 +243,7 @@ function saveChangesToPersistable(newObject) {
    * if the url is already present then, update the tags if any new tags appear.
    */
 
-  chrome.storage.local.get('Persistable', function(items) {
+  chrome.storage.local.get('Persistable', function (items) {
     handleSavePersistable(items, newObject);
   });
 }
@@ -253,8 +253,42 @@ function getTitleOfPageFromDOM(tabId, callback) {
   chrome.tabs.sendMessage(tabId, {
       command: "GetCurrentPageTitleFromDOM",
     },
-    function(title) {
+    function (title) {
       console.log("Title of page:", title);
       callback(title);
     });
 }
+
+
+/**
+ * Adding a listener on installed .
+ * This is supposed to run when the extension is first installed.
+ * It will load the complete history into the persistable database.
+ */
+chrome.runtime.onInstalled.addListener(function callback() {
+
+  chrome.history.search({
+    text: ""
+  }, function (historyItems) {
+    var allItems = [];
+    historyItems.forEach(function (item) {
+      var title = item.title;
+      var url = item.url;
+      var searchText = new FilterStopWords(title);
+      var generatedTags = searchText.generateTags();
+      var newObject = {};
+      newObject.url = url;
+      newObject.tags = generatedTags;
+      if (newObject.url && newObject.tags && item.title) {
+        allItems.push(newObject);
+      }
+    });
+    // Save it using the Chrome extension storage API.
+    chrome.storage.local.set({
+      'Persistable': allItems
+    }, function () {
+      console.log('Persistable saved');
+    });
+
+  });
+});
