@@ -46,7 +46,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     console.log(tab);
 
     getTitleOfPageFromDOM(tab.id, function (title) {
-      if (title.indexOf('Google Search') != -1) {
+      if (title && title.indexOf('Google Search') != -1) {
         // TODO: Find a way for figuring out the search tags from the google search url
         // the search is not always the titile of the page
         var searchText = new FilterStopWords(title);
@@ -250,13 +250,15 @@ function saveChangesToPersistable(newObject) {
 
 // Gets the title of a page by firing a event: GetCurrentPageTitleFromDOM, that has binding in content script
 function getTitleOfPageFromDOM(tabId, callback) {
-  chrome.tabs.sendMessage(tabId, {
+  setTimeout(function () {
+    chrome.tabs.sendMessage(tabId, {
       command: "GetCurrentPageTitleFromDOM",
     },
     function (title) {
       console.log("Title of page:", title);
       callback(title);
     });
+  }, 2000);
 }
 
 
